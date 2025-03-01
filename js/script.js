@@ -41,59 +41,29 @@ document.addEventListener('DOMContentLoaded', function() {
   editor.on("change", updatePreview);
   previewContainer.addEventListener("input", updateCodeFromPreview);
 
-
-   // --- SPACEBAR-HOLD TO TALK FUNCTIONALITY ---
-    // When the spacebar is pressed and held, start recognition.
-    document.addEventListener("keydown", function(e) {
-      if (e.code === "Space" && !e.repeat) {
-        // Start recognition using the globally exposed function from azureVoice.js.
-        if (!window.isRecognizing) {
-          window.startRecognition();
-        }
-      }
-    });
-  
-    // When the spacebar is released, stop recognition and then auto-submit.
-    document.addEventListener("keyup", function(e) {
-      if (e.code === "Space") {
-        if (window.isRecognizing) {
-          window.stopRecognition();
-          // Wait briefly for the final recognition result to be processed, then auto-submit.
-          setTimeout(function() {
-            document.getElementById("submitBtn").click();
-          }, 1000);
-        }
-      }
-    });
-
-
-
-
   // Show settings modal when settings button is clicked.
   var settingsBtn = document.getElementById("settingsBtn");
   settingsBtn.addEventListener("click", function() {
     $("#settingsModal").modal("show");
   });
 
-  // When the Settings modal is shown, scan for microphones.
+  // When the Settings modal is shown, enumerate available microphones.
   $("#settingsModal").on("shown.bs.modal", function() {
     window.enumerateMicrophones();
   });
 
   // -------------------------------
-  // Local Storage for Modal Settings
+  // Local Storage for Settings
   // -------------------------------
-
-  // Load settings from local storage and update UI elements.
   function loadSettings() {
-    const settings = localStorage.getItem("speechSettings");
+    const settings = localStorage.getItem("appSettings");
     if (settings) {
       try {
         const parsed = JSON.parse(settings);
+        // Speech settings
         document.getElementById("key").value = parsed.key || "";
         document.getElementById("regionOptions").value = parsed.region || "westus";
         document.getElementById("languageOptions").value = parsed.language || "en-US";
-        // Input source (we only have microphone here).
         document.getElementById("inputSourceMicrophoneRadio").checked = true;
         document.getElementById("scenarioSelection").value = parsed.scenario || "speechRecognizerRecognizeOnce";
         if (parsed.format === "Detailed") {
@@ -101,27 +71,31 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           document.getElementById("formatSimpleRadio").checked = true;
         }
+        // LLM credentials
+        document.getElementById("llmEndpoint").value = parsed.llmEndpoint || "";
+        document.getElementById("llmApiKey").value = parsed.llmApiKey || "";
+        document.getElementById("llmDeploymentName").value = parsed.llmDeploymentName || "";
       } catch (e) {
-        console.error("Error loading speech settings:", e);
+        console.error("Error loading settings:", e);
       }
     }
   }
 
-  // Save settings to local storage whenever a change is made.
   function saveSettings() {
     const settings = {
       key: document.getElementById("key").value,
       region: document.getElementById("regionOptions").value,
       language: document.getElementById("languageOptions").value,
-      // For now, we assume only Microphone is available.
       inputSource: document.querySelector('input[name="inputSourceOption"]:checked').value,
       scenario: document.getElementById("scenarioSelection").value,
-      format: document.querySelector('input[name="formatOption"]:checked').value
+      format: document.querySelector('input[name="formatOption"]:checked').value,
+      llmEndpoint: document.getElementById("llmEndpoint").value,
+      llmApiKey: document.getElementById("llmApiKey").value,
+      llmDeploymentName: document.getElementById("llmDeploymentName").value
     };
-    localStorage.setItem("speechSettings", JSON.stringify(settings));
+    localStorage.setItem("appSettings", JSON.stringify(settings));
   }
 
-  // Attach change listeners to all inputs/selects within the settings modal.
   function setupSettingsSave() {
     const inputs = document.querySelectorAll("#settingsModal input, #settingsModal select");
     inputs.forEach(input => {
@@ -131,4 +105,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   loadSettings();
   setupSettingsSave();
+
+  // -------------------------------
+  // SPACEBAR-HOLD TO TALK FUNCTIONALITY
+  // -------------------------------
+  document.addEventListener("keydown", function(e) {
+    if (e.code === "Space" && !e.repeat) {
+      if (!window.isRecognizing) {
+        window.startRecognition();
+      }
+    }
+  });
+
+  document.addEventListener("keyup", function(e) {
+    if (e.code === "Space") {
+      if (window.isRecognizing) {
+        window.stopRecognition();
+        setTimeout(function() {
+          document.getElementById("submitBtn").click();
+        }, 1000);
+      }
+    }
+  });
 });

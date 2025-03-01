@@ -1,22 +1,16 @@
 // llmIntegration.js
 
-// Global conversation history array (stores user and assistant messages)
-// We limit the history to the last 20 messages (excluding the system message).
+// Global conversation history (last 20 messages)
 let conversationHistory = [];
 
-/**
- * updateHtmlWithLLM()
- * Constructs a conversation payload that includes the conversation history,
- * sends it to the LLM, parses the response, and then updates the editor and voice narration.
- */
 async function updateHtmlWithLLM() {
   const userPrompt = document.getElementById("prompt").value.trim();
   const currentHtml = window.editor.getValue();
-
+  
   // Announce the start of processing.
   speak("Processing your request.");
-
-  // Define the strict system message (always included at the start).
+  
+  // Construct the system message with strict instructions.
   const systemMessage =
     "You are a strict HTML code editor and accessible assistant. When given a user instruction and an HTML code snippet, update the HTML code according to the instruction if needed. " +
     "Always respond in exactly the following format, with no additional text, commentary, or markdown formatting:\n\n" +
@@ -24,22 +18,34 @@ async function updateHtmlWithLLM() {
     "HTML: <the updated HTML code; if no changes are needed, leave this section empty>\n\n" +
     "Always return the complete html code of the page and not just the specific snippet of change.\n\n" +
     "Do not include any markdown formatting (such as triple backticks) or any extra symbols.";
-
-  // Construct the new user message including the current HTML.
+  
   const newUserMessage = { 
     role: "user", 
     content: `Instruction: ${userPrompt}\n\nHTML CODE:\n${currentHtml}` 
   };
 
-  // Build the complete messages array:
-  // - Start with the system message.
-  // - Append the conversation history (if any).
-  // - Append the new user message.
+  // Build messages array including conversation history.
   const messages = [
     { role: "system", content: systemMessage },
     ...conversationHistory,
     newUserMessage
   ];
+
+  // Get LLM credentials from settings modal.
+  const llmEndpoint = document.getElementById("llmEndpoint").value.trim();
+  const llmApiKey = document.getElementById("llmApiKey").value.trim();
+  const llmDeploymentName = document.getElementById("llmDeploymentName").value.trim();
+  
+  if (!llmEndpoint || !llmApiKey) {
+    alert("Please provide LLM API credentials in the Settings modal.");
+    return;
+  }
+  
+  const llmConfig = {
+    endpoint: llmEndpoint,
+    apiKey: llmApiKey,
+    deploymentName: llmDeploymentName
+  };
 
   const payload = {
     messages: messages,
@@ -64,7 +70,7 @@ async function updateHtmlWithLLM() {
     const data = await response.json();
     const answer = data.choices[0].message.content.trim();
 
-    // Parse the answer. Expected format:
+    // Parse expected format:
     // Voice narration: <narration text>
     // HTML: <html code>
     const parts = answer.split(/HTML:\s*/);
@@ -74,25 +80,19 @@ async function updateHtmlWithLLM() {
     const voiceNarration = parts[0].replace(/^Voice narration:\s*/i, "").trim();
     let htmlPart = parts[1].trim();
 
-    // Remove any markdown code block markers.
+    // Remove any markdown formatting.
     htmlPart = htmlPart.replace(/^```(?:html)?/i, "").replace(/```$/i, "").trim();
 
-    // Add the assistant's response to the conversation history.
-    // We store the full raw response (you could store only the user or assistant parts if desired).
+    // Add new messages to conversation history.
     const assistantMessage = { role: "assistant", content: answer };
     conversationHistory.push(newUserMessage, assistantMessage);
-
-    // Limit conversation history to the last 20 messages.
     if (conversationHistory.length > 20) {
       conversationHistory = conversationHistory.slice(-20);
     }
 
-    // Use voice synthesis to narrate the voice narration part.
     if (voiceNarration) {
       speak(voiceNarration);
     }
-
-    // If the HTML part is not empty, update the CodeMirror editor.
     if (htmlPart) {
       window.editor.setValue(htmlPart);
     }
