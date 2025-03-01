@@ -1,0 +1,9 @@
+# Ignore sensitive LLM credentials
+js/llmCredentials.js
+
+# Ignore Node modules if you're using Node
+.git
+
+# Ignore any build artifacts or temporary files
+dist/
+*.log

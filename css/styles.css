@@ -1,0 +1,40 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  /* Both columns fill the viewport height minus the footer */
+  .editor, .preview {
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  
+  /* Ensure CodeMirror editor takes up full height */
+  .CodeMirror {
+    height: 100% !important;
+  }
+  
+  /* Style for the footer input group */
+  .footer-input {
+    width: 100%;
+  }
+  
+  /* Remove focus outline on preview */
+  #rendered-content:focus {
+    outline: none;
+  }
+  
+  /* Microphone active state: red-orange pulsing background */
+  .btn.listening {
+    background-color: #ff4500;
+    animation: pulseColor 1s infinite;
+  }
+  
+  @keyframes pulseColor {
+    0% { background-color: #ff4500; }
+    50% { background-color: #ffa500; }
+    100% { background-color: #ff4500; }
+  }
+
+
+  
