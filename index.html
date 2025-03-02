@@ -17,25 +17,13 @@
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 </head>
 <body>
-  <div class="container-fluid">
+  <div class="container-fluid p-0"></div>
     <div class="row no-gutters">
       <!-- Left Column: CodeMirror Editor -->
       <div class="col-md-6 editor border-right">
         <textarea id="code-editor">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Vegetables and Fruits</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #dee2e6; padding: 12px; }
-    th { background-color: #f8f9fa; text-align: left; }
-  </style>
-</head>
-<body class="p-4">
-  <h1 class="mb-3 text-primary">List of Vegetables and Fruits</h1>
+<div class="container">
+  <h1 class="mb-4">Vegetables and Fruits</h1>
   <table class="table table-bordered table-striped">
     <thead class="thead-light">
       <tr>
@@ -62,13 +50,12 @@
       </tr>
     </tbody>
   </table>
-</body>
-</html>
+</div>
         </textarea>
       </div>
       <!-- Right Column: Live Preview -->
-      <div class="col-md-6 preview">
-        <div id="rendered-content" class="p-3" contenteditable="true">
+      <div id="preview-content" class="col-md-6 preview">
+        <div id="rendered-content" contenteditable="true">
           <!-- Live preview appears here -->
         </div>
       </div>
@@ -78,10 +65,13 @@
   <!-- Sticky Footer with Prompt, Mic, Submit, and Settings -->
   <footer class="navbar fixed-bottom navbar-light bg-light">
     <div class="container-fluid d-flex flex-nowrap align-items-center">
-      <!-- Microphone Button -->
-      <button id="micBtn" class="btn btn-outline-secondary mr-2" type="button">
-        <i class="fas fa-microphone"></i>
-      </button>
+      <!-- Microphone Button - fix text wrapping issue -->
+      <div class="d-flex align-items-center mr-2">
+        <button id="micBtn" class="btn btn-outline-secondary text-nowrap" type="button">
+          <i class="fas fa-microphone"></i>
+          <span class="ml-1">Hold to speak</span>
+        </button>
+      </div>
       <!-- Prompt Input & Submit -->
       <div class="input-group flex-grow-1">
         <input type="text" id="prompt" class="form-control" placeholder="Type your text prompt">

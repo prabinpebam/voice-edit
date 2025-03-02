@@ -14,26 +14,31 @@ document.addEventListener('DOMContentLoaded', function() {
   var syncingFromPreview = false;
   var syncingFromCodeMirror = false;
 
+  // Replace the updatePreview function with this simplified version
   function updatePreview() {
     if (syncingFromPreview) return;
     syncingFromCodeMirror = true;
-    var code = editor.getValue();
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(code, "text/html");
-    previewContainer.innerHTML = doc.body.innerHTML;
+    
+    // Get content directly from editor
+    var snippet = editor.getValue();
+    
+    // Set the inner content directly (no body tag parsing needed)
+    previewContainer.innerHTML = snippet;
+    
     syncingFromCodeMirror = false;
   }
 
+  // Update the updateCodeFromPreview function as well
   function updateCodeFromPreview() {
     if (syncingFromCodeMirror) return;
     syncingFromPreview = true;
-    var updatedBody = previewContainer.innerHTML;
-    var code = editor.getValue();
-    var parser = new DOMParser();
-    var doc = parser.parseFromString(code, "text/html");
-    doc.body.innerHTML = updatedBody;
-    var updatedCode = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-    editor.setValue(updatedCode);
+    
+    // Get the HTML directly from preview container
+    var updatedHtml = previewContainer.innerHTML;
+    
+    // Set the editor value directly
+    editor.setValue(updatedHtml);
+    
     syncingFromPreview = false;
   }
 
@@ -113,6 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.code === "Space" && !e.repeat) {
       if (!window.isRecognizing) {
         window.startRecognition();
+        // Add animation class to the mic button
+        micBtn.classList.add("listening");
       }
     }
   });
@@ -121,10 +128,42 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.code === "Space") {
       if (window.isRecognizing) {
         window.stopRecognition();
+        // Remove animation class from the mic button
+        micBtn.classList.remove("listening");
         setTimeout(function() {
           document.getElementById("submitBtn").click();
         }, 1000);
       }
+    }
+  });
+
+  // -------------------------------
+  // CLICK-AND-HOLD MIC BUTTON FUNCTIONALITY
+  // -------------------------------
+  const micBtn = document.getElementById("micBtn");
+
+  micBtn.addEventListener("mousedown", function() {
+    if (!window.isRecognizing) {
+      window.startRecognition();
+      // Add animation class to the button
+      micBtn.classList.add("listening");
+    }
+  });
+
+  micBtn.addEventListener("mouseup", function() {
+    if (window.isRecognizing) {
+      window.stopRecognition();
+      // Remove animation class from the button
+      micBtn.classList.remove("listening");
+    }
+  });
+
+  micBtn.addEventListener("mouseleave", function() {
+    // If mouse leaves the button while still pressed, stop recognition
+    if (window.isRecognizing) {
+      window.stopRecognition();
+      // Remove animation class from the button
+      micBtn.classList.remove("listening");
     }
   });
 });

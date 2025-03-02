@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Azure Blob Storage Upload & List Demo</title>
+</head>
+<body>
+  <h1>Upload & List Files in Azure Blob Storage</h1>
+
+  <!-- File input + upload button -->
+  <div>
+    <input type="file" id="fileInput">
+    <button id="uploadButton">Upload</button>
+  </div>
+  <div id="status"></div>
+
+  <!-- List of uploaded blobs -->
+  <h2>Uploaded Files</h2>
+  <button id="refreshButton">Refresh List</button>
+  <div id="fileList"></div>
+
+  <!-- Load our module script -->
+  <script type="module" src="js/azure-storage.js"></script>
+</body>
+</html>
